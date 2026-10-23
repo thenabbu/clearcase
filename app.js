@@ -245,6 +245,5 @@ $('seed-btn').addEventListener('click', function(){
   }
 })();
 
-$('to-checklist').addEventListener('click', function(){ show('checklist'); });
 updateCount();
 show('consent');

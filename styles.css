@@ -51,7 +51,7 @@ legend{padding:0 6px; margin-left:-6px}
 .pick{display:flex; gap:10px; align-items:flex-start; padding:11px 4px; font-size:15.5px;
   border-bottom:1px solid var(--line); cursor:pointer; min-height:44px}
 .pick:last-of-type{border-bottom:0}
-.pick input{width:20px; height:20px; margin-top:2px; flex:0 0 auto; accent-color:var(--accent)}
+.pick input{width:22px; height:22px; margin-top:2px; flex:0 0 auto; accent-color:var(--accent)}
 .pick.strong{font-weight:600}
 .pick em{color:var(--muted); font-weight:400}
 hr{border:0; border-top:1px solid var(--line); margin:10px 0}
@@ -92,7 +92,7 @@ button.ghost{background:transparent}
   border-radius:6px; padding:1px 6px; margin-left:6px}
 
 footer{max-width:680px; margin:0 auto; padding:18px 16px 30px; color:var(--muted);
-  font-size:13px; border-top:1px solid var(--line); text-align:center}
+  font-size:14px; border-top:1px solid var(--line); text-align:center}
 footer p{margin:4px 0}
 
 @media (max-width:420px){
@@ -107,3 +107,7 @@ footer p{margin:4px 0}
 @media (prefers-reduced-motion:reduce){
   *{transition:none !important; animation:none !important; scroll-behavior:auto !important}
 }
+
+/* polish pass after visual review */
+#start-btn{width:100%}
+.pick{padding:12px 4px}
