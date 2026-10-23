@@ -46,7 +46,7 @@ Built for **Hacktober HackDays 2026** (SheBuilds × Cloudinary × Notion) · Tea
 
 ## Demo
 
-**{{DEMO_URL}}**
+**https://clearcase-thenabbus-projects.vercel.app**
 
 3-minute script: throttle to Slow 3G → original vs delivered size → photograph something
 blurry → retake gate fires with the score → tick one danger sign → red case lands on top of
