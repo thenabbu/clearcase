@@ -144,6 +144,27 @@ min ratio 5.28). Buttons: primary = ink/paper; ghost = transparent. Focus: 2 px 
   category reflex); borders allowed only as input outlines/dividers/pane gutter;
   no hero/landing anatomy (App profile).
 
+## 12.5. Round-3 additions (24 Oct, design-review pass)
+
+Owner verdict on round 2: "still AI slop — not made properly." Fixes shipped and render-verified:
+
+- **Identity:** `.mark` = ink38px square, mono `CC`700 + bottom4px hard-stop tri-stripe
+  (red|amber|green = IMCI identity, flat bars — the one deliberate gradient-syntax use,
+  documented here). Matching SVG data-URI favicon (ink square, CC, tri dots).
+  Header height64px; h1 =18px/700; tagline = mono12px letter-spaced muted.
+- **Type hierarchy:** section labels now ink13px/700 uppercase with mono `.sec-num`
+  index prefix (`01`/`02`/`03`, muted400); `.sec-note` demoted to muted12.5.
+- **Urgency strips:** group `<legend>` is a full-bleed tinted header strip
+  (red-bg / amber-bg, radius10 top) — the group reads at a glance.
+- **Custom checkboxes:** appearance-none ink-outline box, check drawn via rotated
+  border, hover→ink border; ticked rows tint with their group colour via
+  `:has(input:checked)` (unsupported browsers degrade to untinted, still functional).
+- **Live-priority banner:** `.level-line` = full-width tinted banner
+  (lvl-bg-red/amber/green, set by `recalcLevel` on the parent `<p>`).
+- **Primary action:** `#shoot-btn` =54px tall,17px — the one dominant action.
+- **Board:** rail5px, thumb56px, qlvl13/700, chevron18 + ink on hover, row min70px;
+  empty state carries `.tri-dots` (the three priority colours) as its identity note.
+
 ## 13. Future page instructions
 
 Reuse §3–§10 verbatim: paper+ink, Plex Sans/Mono, ranked gaps (34/14/12/10),
