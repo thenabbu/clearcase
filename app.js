@@ -7,6 +7,7 @@ var FOLDER = 'clearcase_cases';
 var THRESHOLD = 0.4; // start value; tune against real field photos (Notion doc, section 6)
 var WIDGET = null;
 var pending = null; // accepted photo of the case being created
+var current = null; // computed priority + ticked signs of the case being created
 
 function $(id){ return document.getElementById(id); }
 function all(sel, root){ return Array.prototype.slice.call((root||document).querySelectorAll(sel)); }
