@@ -87,9 +87,10 @@ function recalcLevel(){
 all('.sig').forEach(function(c){ c.addEventListener('change', recalcLevel); });
 
 function buildContext(){
+  // pipe-separated k=v pairs — the Cloudinary upload API's context format
   var s = signsList().join(',');
-  return 'level=' + level() + ';signs=' + (s || 'none') +
-    ';guardian=' + (($('age-under').checked && $('guardian-check').checked) ? '1' : '0');
+  return 'level=' + level() + '|signs=' + (s || 'none') +
+    '|guardian=' + (($('age-under').checked && $('guardian-check').checked) ? '1' : '0');
 }
 
 /* ---------- signed upload ---------- */

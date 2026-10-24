@@ -16,11 +16,12 @@ module.exports = (req, res) => {
   };
   // Optional case metadata (level/signs/guardian) rides with the upload as Cloudinary
   // context, so the board can be listed server-side without a second write.
-  // Cloudinary's upload endpoint hashes RAW received values (verified against a live
-  // 401: its "string to sign" echoed the raw context), so no percent-encoding here;
-  // values must not contain '&' or '%' (would break the k=v parsing server-side).
+  // Format is pipe-separated k=v pairs (upload API reference: "alt=My image|caption=…").
+  // Signing hashes the value raw exactly as sent (verified against live 401
+  // string-to-sign echoes); values must never contain '&' — the server would encode
+  // it to %26 and break signature parity.
   const ctx = req.body && typeof req.body.context === 'string' ? req.body.context.slice(0, 400) : '';
-  if (ctx && !/[&%]/.test(ctx)) params.context = ctx;
+  if (ctx && ctx.indexOf('&') === -1) params.context = ctx;
   const toSign = Object.keys(params).sort().map(k => k + '=' + params[k]).join('&');
   const signature = crypto.createHash('sha1').update(toSign + secret).digest('hex');
 

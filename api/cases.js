@@ -17,7 +17,7 @@ function creds() {
 async function listCases({ key, secret }) {
   const url = 'https://api.cloudinary.com/v1_1/' + CLOUD + '/resources/image'
     + '?type=upload&prefix=' + encodeURIComponent(FOLDER + '/')
-    + '&max_results=100&sort_by=created_at%3Adesc&with_context=true';
+    + '&max_results=100&sort_by=created_at%3Adesc&context=true';
   const r = await fetch(url, { headers: { Authorization: 'Basic ' + Buffer.from(key + ':' + secret).toString('base64') } });
   if (!r.ok) throw new Error('admin list HTTP ' + r.status);
   const j = await r.json();
@@ -42,7 +42,9 @@ async function listCases({ key, secret }) {
 async function destroyCase(publicId, { key, secret }) {
   if (!publicId.startsWith(FOLDER + '/')) throw new Error('public_id outside case folder');
   const params = { public_id: publicId, timestamp: String(Math.floor(Date.now() / 1000)), type: 'upload' };
-  const toSign = Object.keys(params).sort().map((k) => k + '=' + encodeURIComponent(params[k])).join('&');
+  // raw join, verified against the live 401 string-to-sign:
+  // 'public_id=clearcase_cases/<id>&timestamp=…&type=upload' (a '/' must stay raw)
+  const toSign = Object.keys(params).sort().map((k) => k + '=' + params[k]).join('&');
   const signature = crypto.createHash('sha1').update(toSign + secret).digest('hex');
   const body = new URLSearchParams(Object.assign({}, params, { api_key: key, signature: signature }));
   const r = await fetch('https://api.cloudinary.com/v1_1/' + CLOUD + '/image/destroy', { method: 'POST', body });
