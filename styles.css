@@ -111,3 +111,6 @@ footer p{margin:4px 0}
 /* polish pass after visual review */
 #start-btn{width:100%}
 .pick{padding:12px 4px}
+
+/* DUT visual-review: sample marker visibility */
+.sample{color:#2b3a49; border-color:#5b6b7c; font-weight:800}
