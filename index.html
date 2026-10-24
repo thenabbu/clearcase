@@ -4,138 +4,113 @@
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'>
 <meta name='robots' content='noindex'>
-<title>ClearCase — Telemedicine Image Triage</title>
-<meta name='description' content='Catch a bad photo before the patient leaves the room. Field photo triage for rural health workers, powered by Cloudinary.'>
+<title>ClearCase — field photo triage</title>
+<meta name='description' content='Catch a bad photo before the patient leaves. Photo capture with an instant blur gate and an IMCI-based priority board for telemedicine consultations.'>
+<link rel='preconnect' href='https://fonts.googleapis.com'>
+<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+<link href='https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap' rel='stylesheet'>
 <link rel='stylesheet' href='styles.css'>
 </head>
 <body>
+<a class='skip' href='#case-form'>Skip to new case</a>
+
 <header class='top'>
   <div class='brand'>
-    <span class='logo' aria-hidden='true'>CC</span>
-    <div>
+    <span class='mark' aria-hidden='true'>CC</span>
+    <div class='names'>
       <h1>ClearCase</h1>
-      <p class='tag'>Field photo triage for health workers</p>
+      <p class='sub'>telemedicine photo triage</p>
     </div>
   </div>
-  <button id='queue-link' class='ghost' type='button'>Queue <span id='queue-count' class='badge' aria-label='cases in queue'>0</span></button>
+  <a class='board-jump' href='#board'>Board <span class='mono' id='hd-count'>—</span></a>
 </header>
 
-<nav class='steps' aria-label='Progress'>
-  <ol id='steps-list'>
-    <li data-step='consent' class='on'>1 · Consent</li>
-    <li data-step='capture'>2 · Photo</li>
-    <li data-step='checklist'>3 · Signs</li>
-    <li data-step='result'>4 · Priority</li>
-  </ol>
-</nav>
+<div class='workspace'>
 
-<main id='main'>
+  <!-- ============ new case ============ -->
+  <main id='case-form' class='pane-form'>
 
-  <!-- 1 · CONSENT -->
-  <section id='view-consent' class='view on' aria-labelledby='h-consent'>
-    <h2 id='h-consent'>Before the photo</h2>
-    <p class='notice'>A photo of the patient will be sent for a remote consultation and stored on a secure cloud service. It is only used for this consultation. You can ask us to delete it at any time.</p>
-    <div class='card'>
-      <label class='pick'><input type='checkbox' id='age-under'> <span>Patient is under 18</span></label>
-      <label class='pick hidden' id='guardian-wrap'><input type='checkbox' id='guardian-check'> <span>Parent/guardian has agreed <em>(required for under 18)</em></span></label>
-      <hr>
-      <label class='pick strong'><input type='checkbox' id='consent-check'> <span>I explained this to the patient and they agree to the photo being taken and sent.</span></label>
-      <button id='start-btn' class='primary' type='button' disabled>Start — take a photo</button>
-      <p id='consent-hint' class='hint'>Both ticks are required to continue.</p>
-    </div>
-  </section>
+    <section class='sec' aria-labelledby='l-consent'>
+      <h2 class='sec-label' id='l-consent'>Consent</h2>
+      <p class='notice'>The photo will be sent for a remote consultation and stored on a secure cloud service for that consultation only. It can be deleted on request.</p>
+      <div class='checks'>
+        <label class='check'><input type='checkbox' id='age-under'><span>Patient is under 18</span></label>
+        <label class='check' id='guardian-wrap' hidden><input type='checkbox' id='guardian-check'><span>Parent/guardian agreed to the photo <em>(required)</em></span></label>
+        <label class='check strong'><input type='checkbox' id='consent-check'><span>I explained this to the patient and they agree.</span></label>
+      </div>
+    </section>
 
-  <!-- 2 · CAPTURE -->
-  <section id='view-capture' class='view' aria-labelledby='h-capture'>
-    <h2 id='h-capture'>Photo of the condition</h2>
-    <p class='hint'>Fill the frame with the affected area. The app checks the photo instantly — if it is too blurry to read, retake it <strong>while the patient is still here</strong>.</p>
+    <section class='sec' aria-labelledby='l-signs'>
+      <h2 class='sec-label' id='l-signs'>Danger signs <span class='sec-note'>WHO IMCI chart</span></h2>
+      <fieldset class='grp'>
+        <legend class='lvl-legend lvl-red-text'>Refer urgently — red</legend>
+        <label class='check'><input type='checkbox' class='sig' data-g='r' data-i='0'><span>Unable to drink or breastfeed</span></label>
+        <label class='check'><input type='checkbox' class='sig' data-g='r' data-i='1'><span>Vomits everything</span></label>
+        <label class='check'><input type='checkbox' class='sig' data-g='r' data-i='2'><span>Has had convulsions (now or recently)</span></label>
+        <label class='check'><input type='checkbox' class='sig' data-g='r' data-i='3'><span>Lethargic or unconscious</span></label>
+        <label class='check'><input type='checkbox' class='sig' data-g='r' data-i='4'><span>Fever with stiff neck</span></label>
+        <label class='check'><input type='checkbox' class='sig' data-g='r' data-i='5'><span>Noisy breathing (stridor) when calm</span></label>
+        <label class='check'><input type='checkbox' class='sig' data-g='r' data-i='6'><span>Severe dehydration — 2 or more of: lethargic/unconscious, sunken eyes, cannot drink, skin pinch &gt; 2 s</span></label>
+      </fieldset>
+      <fieldset class='grp'>
+        <legend class='lvl-legend lvl-amber-text'>Treat, review in 24–48 h — yellow</legend>
+        <label class='check'><input type='checkbox' class='sig' data-g='y' data-i='0'><span>Chest indrawing when breathing</span></label>
+        <label class='check'><input type='checkbox' class='sig' data-g='y' data-i='1'><span>Fast breathing (≥50/min at 2–12 mo, ≥40/min at 1–5 y)</span></label>
+        <label class='check'><input type='checkbox' class='sig' data-g='y' data-i='2'><span>Some dehydration (restless, sunken eyes, drinks eagerly, slow skin pinch)</span></label>
+        <label class='check'><input type='checkbox' class='sig' data-g='y' data-i='3'><span>Diarrhoea 14 days or more</span></label>
+        <label class='check'><input type='checkbox' class='sig' data-g='y' data-i='4'><span>Blood in stool</span></label>
+      </fieldset>
+      <p class='level-line' aria-live='polite'>Suggested priority: <strong id='lvl-now' class='mono'>GREEN — routine</strong></p>
+      <p class='hint'>Suggested from the chart for the reviewing doctor — not a diagnosis (NMC 2022 §5.7).</p>
+    </section>
 
-    <div id='up-state' class='card center'>
-      <button id='shoot-btn' class='primary big' type='button'>Take or choose photo</button>
+    <section class='sec' aria-labelledby='l-photo'>
+      <h2 class='sec-label' id='l-photo'>Photo</h2>
+      <div id='retake' class='alert alert-red hidden' role='alert'>
+        <p class='alert-title'>Too blurry to read — retake</p>
+        <p class='alert-body'>Focus <span class='mono' id='retake-score'>—</span>, needs ≥ <span class='mono'>0.40</span>. Clinical detail is unreadable at this sharpness. The upload was discarded — take it again while the patient is here.</p>
+      </div>
+      <div id='saved' class='alert alert-ok hidden' role='status'>
+        <p class='alert-title'>Saved to the board</p>
+        <p class='alert-body'>Case <span class='mono' id='saved-id'></span> is visible to the reviewing doctor. Consent resets for the next patient.</p>
+      </div>
+      <button id='shoot-btn' class='btn btn-primary btn-wide' type='button' disabled>Take photo</button>
       <p id='up-status' class='hint' role='status'></p>
-    </div>
+      <p id='shoot-reason' class='hint warn'>Tick consent to enable the camera.</p>
+    </section>
 
-    <div id='retake' class='card danger hidden' role='alert'>
-      <p class='chip red'>TOO BLURRY — RETAKE</p>
-      <p>Focus score <strong id='retake-score'>—</strong> (needs ≥ <span class='thr'>0.40</span>). Clinical detail would be unreadable at this sharpness. <a href='https://pmc.ncbi.nlm.nih.gov/articles/PMC10018405' target='_blank' rel='noopener'>Why this matters</a>.</p>
-      <button id='retake-btn' class='primary' type='button'>Retake photo</button>
-    </div>
+  </main>
 
-    <div id='accepted' class='card ok hidden'>
-      <p class='chip green'>PHOTO ACCEPTED</p>
-      <img id='acc-thumb' alt='Uploaded photo preview'>
-      <p id='acc-meta' class='hint'></p>
-      <button id='to-checklist' class='primary' type='button'>Next — danger signs →</button>
-    </div>
-  </section>
-
-  <!-- 3 · CHECKLIST -->
-  <section id='view-checklist' class='view' aria-labelledby='h-check'>
-    <h2 id='h-check'>Danger signs <span class='sub'>(WHO IMCI chart)</span></h2>
-    <p class='hint'>Tick what you observe. <strong>Any sign in the red group → refer urgently.</strong> This suggests a priority for the reviewing doctor — it is not a diagnosis.</p>
-
-    <fieldset class='card red-g'>
-      <legend><span class='chip red'>RED — refer urgently now</span></legend>
-      <label class='pick'><input type='checkbox' class='sig' data-lvl='red'> <span>Unable to drink or breastfeed</span></label>
-      <label class='pick'><input type='checkbox' class='sig' data-lvl='red'> <span>Vomits everything</span></label>
-      <label class='pick'><input type='checkbox' class='sig' data-lvl='red'> <span>Has had convulsions (now or recently)</span></label>
-      <label class='pick'><input type='checkbox' class='sig' data-lvl='red'> <span>Lethargic or unconscious</span></label>
-      <label class='pick'><input type='checkbox' class='sig' data-lvl='red'> <span>Fever with stiff neck</span></label>
-      <label class='pick'><input type='checkbox' class='sig' data-lvl='red'> <span>Noisy breathing (stridor) when calm</span></label>
-      <label class='pick'><input type='checkbox' class='sig' data-lvl='red'> <span>Severe dehydration — 2 or more of: lethargic/unconscious, sunken eyes, cannot drink, skin pinch &gt; 2 s</span></label>
-    </fieldset>
-
-    <fieldset class='card yellow-g'>
-      <legend><span class='chip yellow'>YELLOW — treat, review in 24–48 h</span></legend>
-      <label class='pick'><input type='checkbox' class='sig' data-lvl='yellow'> <span>Chest indrawing when breathing</span></label>
-      <label class='pick'><input type='checkbox' class='sig' data-lvl='yellow'> <span>Fast breathing (≥50/min at 2–12 mo, ≥40/min at 1–5 y)</span></label>
-      <label class='pick'><input type='checkbox' class='sig' data-lvl='yellow'> <span>Some dehydration (restless, sunken eyes, drinks eagerly, slow skin pinch)</span></label>
-      <label class='pick'><input type='checkbox' class='sig' data-lvl='yellow'> <span>Diarrhoea 14 days or more</span></label>
-      <label class='pick'><input type='checkbox' class='sig' data-lvl='yellow'> <span>Blood in stool</span></label>
-    </fieldset>
-
-    <div class='row'>
-      <button id='submit-checks' class='primary' type='button'>Get suggested priority</button>
-      <button id='back-capture' class='ghost' type='button'>← Photo</button>
-    </div>
-    <p id='checks-empty' class='hint'>No sign ticked → routine follow-up (green).</p>
-  </section>
-
-  <!-- 4 · RESULT -->
-  <section id='view-result' class='view' aria-labelledby='h-result'>
-    <h2 id='h-result'>Suggested priority</h2>
-    <div class='card' id='result-card'>
-      <p class='chip' id='res-chip'>—</p>
-      <p id='res-guidance' class='guide'></p>
-      <p class='hint' id='res-why'></p>
-      <p class='hint' id='res-photo'></p>
-      <div class='row'>
-        <button id='save-case' class='primary' type='button'>Save to doctor queue</button>
-        <button id='new-case' class='ghost' type='button'>Start new case</button>
+  <!-- ============ board ============ -->
+  <aside id='board' class='pane-board' aria-labelledby='l-board'>
+    <div class='board-head'>
+      <h2 class='sec-label' id='l-board'>Board</h2>
+      <div class='counts' id='counts' aria-label='cases by priority'>
+        <span class='count c-red'><span class='mono' id='n-red'>0</span> red</span>
+        <span class='count c-amber'><span class='mono' id='n-amber'>0</span> yellow</span>
+        <span class='count c-green'><span class='mono' id='n-green'>0</span> green</span>
       </div>
     </div>
-    <p class='hint'>Colour = suggested priority for the reviewing doctor (NMC 2022 §5.7: software does not counsel; the doctor decides).</p>
-  </section>
 
-  <!-- QUEUE -->
-  <section id='view-queue' class='view' aria-labelledby='h-queue'>
-    <h2 id='h-queue'>Doctor queue <span class='sub'>sorted red → yellow → green</span></h2>
-    <div id='queue-list' class='queue'></div>
-    <div id='queue-empty' class='card center hidden'>
-      <p class='hint'>No cases yet.</p>
-      <button id='seed-btn' class='ghost' type='button'>Load 2 sample cases (clearly marked)</button>
+    <div id='board-loading' class='board-list' aria-hidden='true'>
+      <div class='sk-row'></div><div class='sk-row'></div><div class='sk-row'></div>
     </div>
-    <div class='row'>
-      <button id='queue-new' class='primary' type='button'>+ New case</button>
-      <button id='queue-clear' class='ghost' type='button'>Clear queue</button>
+    <div id='board-empty' class='empty hidden'>
+      <p class='empty-title'>No cases yet</p>
+      <p class='hint'>Cases saved from the form appear here, red first, on every device.</p>
     </div>
-  </section>
+    <div id='board-error' class='empty hidden'>
+      <p class='empty-title'>Could not load the board</p>
+      <p class='hint'>The listing service did not respond.</p>
+      <button id='retry-btn' class='btn btn-ghost' type='button'>Retry</button>
+    </div>
+    <div id='board-list' class='board-list'></div>
+  </aside>
 
-</main>
+</div>
 
 <footer>
-  <p>ClearCase · <a href='https://github.com/thenabbu/clearcase' target='_blank' rel='noopener'>GitHub</a> · Hacktober HackDays 2026 · Team Coffee Beans</p>
-  <p class='hint'>Decision-support only — not a diagnosis. Photos: consent-based, signed uploads, never searchable. Questions? Ask Team Coffee Beans.</p>
+  <p>Decision support only — not a diagnosis. Photos are stored for this consultation and deleted on request. <a href='https://github.com/thenabbu/clearcase' target='_blank' rel='noopener'>Source</a></p>
 </footer>
 
 <script src='https://upload-widget.cloudinary.com/global/all.js'></script>

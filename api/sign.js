@@ -14,7 +14,11 @@ module.exports = (req, res) => {
     quality_analysis: 'true',
     timestamp: String(Math.floor(Date.now() / 1000))
   };
-  const toSign = Object.keys(params).sort().map(k => k + '=' + params[k]).join('&');
+  // Optional case metadata (level/signs/guardian) rides with the upload as Cloudinary
+  // context, so the board can be listed server-side without a second write.
+  const ctx = req.body && typeof req.body.context === 'string' ? req.body.context.slice(0, 400) : '';
+  if (ctx) params.context = ctx;
+  const toSign = Object.keys(params).sort().map(k => k + '=' + encodeURIComponent(params[k])).join('&');
   const signature = crypto.createHash('sha1').update(toSign + secret).digest('hex');
 
   res.status(200).json({ signature, timestamp: params.timestamp, apiKey, folder: params.folder });
