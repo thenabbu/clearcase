@@ -95,7 +95,7 @@ h1{font-size:17px;font-weight:600;margin:0;line-height:1.15;letter-spacing:-.01e
 .notice{
   background:var(--surface);box-shadow:var(--shadow-1);
   border-radius:var(--radius);
-  padding:13px 15px;font-size:14.5px;margin:0 0 14px;
+  padding:13px 15px;font-size:14.5px;margin:0 0 12px;
 }
 .hint{color:var(--muted);font-size:13.5px;margin:8px 0 0}
 .hint.warn{color:var(--red);font-weight:500}
@@ -162,10 +162,10 @@ h1{font-size:17px;font-weight:600;margin:0;line-height:1.15;letter-spacing:-.01e
   box-shadow:var(--shadow-1);
 }
 .alert-red{background:var(--red-bg)}
-.alert-ok{background:var(--green-bg)}
+.alert-ok{background:#e2f1e7}
 .alert-title{margin:0 0 4px;font-weight:600;font-size:15.5px}
 .alert-red .alert-title{color:var(--red)}
-.alert-ok .alert-title{color:var(--green)}
+.alert-ok .alert-title{color:#14532d}
 .alert-body{margin:0;font-size:14.5px}
 
 /* ---------- board ---------- */
@@ -208,7 +208,7 @@ h1{font-size:17px;font-weight:600;margin:0;line-height:1.15;letter-spacing:-.01e
 }
 .qmeta{min-width:0}
 .qlvl{
-  font-family:var(--mono);font-size:12.5px;font-weight:600;
+  font-family:var(--mono);font-size:13px;font-weight:600;
   letter-spacing:.06em;text-transform:uppercase;display:block;
 }
 .qlvl.t-red{color:var(--red)}

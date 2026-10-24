@@ -264,7 +264,7 @@ function renderBoard(list){
     lv.textContent = lvl === 'red' ? 'Red — refer now' : lvl === 'yellow' ? 'Yellow — 24–48 h' : 'Green — routine';
     var line = document.createElement('span');
     line.className = 'qline';
-    line.textContent = parseTime(c.created_at) + ' · ' + (signs.length ? signs.length + ' signs' : 'no signs') +
+    line.textContent = parseTime(c.created_at) + ' · ' + (signs.length ? signs.length + (signs.length === 1 ? ' sign' : ' signs') : 'no signs') +
       (c.bytes ? ' · ' + kb(c.bytes) : '') + ' · ' + c.id;
     meta.appendChild(lv);
     meta.appendChild(line);
