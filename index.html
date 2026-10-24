@@ -6,9 +6,10 @@
 <meta name='robots' content='noindex'>
 <title>ClearCase — field photo triage</title>
 <meta name='description' content='Catch a bad photo before the patient leaves. Photo capture with an instant blur gate and an IMCI-based priority board for telemedicine consultations.'>
+<link rel='icon' href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231c1c1a'/%3E%3Ctext x='32' y='41' font-family='monospace' font-size='30' font-weight='700' fill='%23f0eee8' text-anchor='middle'%3ECC%3C/text%3E%3Crect x='13' y='51' width='12' height='4' rx='2' fill='%23a62b1f'/%3E%3Crect x='26' y='51' width='12' height='4' rx='2' fill='%238a5a00'/%3E%3Crect x='39' y='51' width='12' height='4' rx='2' fill='%231b6b3a'/%3E%3C/svg%3E">
 <link rel='preconnect' href='https://fonts.googleapis.com'>
 <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
-<link href='https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap' rel='stylesheet'>
+<link href='https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap' rel='stylesheet'>
 <link rel='stylesheet' href='styles.css'>
 </head>
 <body>
@@ -16,7 +17,7 @@
 
 <header class='top'>
   <div class='brand'>
-    <span class='mark' aria-hidden='true'>CC</span>
+    <span class='mark' aria-hidden='true'>CC<i class='mark-rail'></i></span>
     <div class='names'>
       <h1>ClearCase</h1>
       <p class='sub'>telemedicine photo triage</p>
@@ -31,7 +32,7 @@
   <main id='case-form' class='pane-form'>
 
     <section class='sec' aria-labelledby='l-consent'>
-      <h2 class='sec-label' id='l-consent'>Consent</h2>
+      <h2 class='sec-label' id='l-consent'><span class='sec-num'>01</span>Consent</h2>
       <p class='notice'>The photo will be sent for a remote consultation and stored on a secure cloud service for that consultation only. It can be deleted on request.</p>
       <div class='checks'>
         <label class='check'><input type='checkbox' id='age-under'><span>Patient is under 18</span></label>
@@ -41,7 +42,7 @@
     </section>
 
     <section class='sec' aria-labelledby='l-signs'>
-      <h2 class='sec-label' id='l-signs'>Danger signs <span class='sec-note'>WHO IMCI chart</span></h2>
+      <h2 class='sec-label' id='l-signs'><span class='sec-num'>02</span>Danger signs <span class='sec-note'>WHO IMCI chart</span></h2>
       <fieldset class='grp'>
         <legend class='lvl-legend lvl-red-text'>Refer urgently — red</legend>
         <label class='check'><input type='checkbox' class='sig' data-g='r' data-i='0'><span>Unable to drink or breastfeed</span></label>
@@ -60,12 +61,12 @@
         <label class='check'><input type='checkbox' class='sig' data-g='y' data-i='3'><span>Diarrhoea 14 days or more</span></label>
         <label class='check'><input type='checkbox' class='sig' data-g='y' data-i='4'><span>Blood in stool</span></label>
       </fieldset>
-      <p class='level-line' aria-live='polite'>Suggested priority: <strong id='lvl-now' class='mono'>GREEN — routine</strong></p>
+      <p class='level-line lvl-bg-green' aria-live='polite'>Suggested priority: <strong id='lvl-now' class='mono'>GREEN — routine</strong></p>
       <p class='hint'>Suggested from the chart for the reviewing doctor — not a diagnosis (NMC 2022 §5.7).</p>
     </section>
 
     <section class='sec' aria-labelledby='l-photo'>
-      <h2 class='sec-label' id='l-photo'>Photo</h2>
+      <h2 class='sec-label' id='l-photo'><span class='sec-num'>03</span>Photo</h2>
       <div id='retake' class='alert alert-red hidden' role='alert'>
         <p class='alert-title'>Too blurry to read — retake</p>
         <p class='alert-body'>Focus <span class='mono' id='retake-score'>—</span>, needs ≥ <span class='mono'>0.40</span>. Clinical detail is unreadable at this sharpness. The upload was discarded — take it again while the patient is here.</p>
@@ -96,8 +97,9 @@
       <div class='sk-row'></div><div class='sk-row'></div><div class='sk-row'></div>
     </div>
     <div id='board-empty' class='empty hidden'>
+      <span class='tri-dots' aria-hidden='true'><i class='d-red'></i><i class='d-amber'></i><i class='d-green'></i></span>
       <p class='empty-title'>No cases yet</p>
-      <p class='hint'>Cases saved from the form appear here, red first, on every device.</p>
+      <p class='hint'>Saved cases appear here — red first, on every device.</p>
     </div>
     <div id='board-error' class='empty hidden'>
       <p class='empty-title'>Could not load the board</p>

@@ -83,6 +83,7 @@ function recalcLevel(){
     : lvl === 'yellow' ? 'YELLOW — review 24–48 h'
     : 'GREEN — routine';
   el.className = 'mono ' + (lvl === 'red' ? 'lvl-red-text2' : lvl === 'yellow' ? 'lvl-amber-text2' : 'lvl-green-text2');
+  el.parentElement.className = 'level-line lvl-bg-' + lvl; // banner background follows the live priority
 }
 all('.sig').forEach(function(c){ c.addEventListener('change', recalcLevel); });
 
