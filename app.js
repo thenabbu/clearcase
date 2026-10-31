@@ -16,6 +16,7 @@ var FOLDER = 'clearcase_cases';
 var THRESHOLD = 0.4;
 var WIDGET = null;
 var signCtx = null;  // context frozen per capture (must equal what the signature covers)
+var signReq = null;  // the whole /api/sign payload, fetched before the widget opens
 var USER = null;
 var CASES = [];
 var FILTER = 'all';
@@ -173,33 +174,48 @@ function setStatus(t){ $('up-status').textContent = t || ''; }
 
 /* The server builds the context string (single schema in api/sign.js) and signs
    exactly what we will send. */
-function signUpload(cb){
-  fetch('/api/sign', {
+function casePayload(){
+  return {
+    level: level(),
+    signs: signsList().join(',') || 'none',
+    guardian: $('age-under').checked && $('guardian-check').checked,
+    patient: $('p-name').value,
+    age: $('p-age').value,
+    village: $('p-village').value,
+    complaint: $('p-complaint').value,
+    notes: $('p-notes').value
+  };
+}
+
+/* Fetch the context BEFORE the widget opens. The widget reads prepareUploadParams
+   first and only then asks for a signature, so signCtx must already be populated —
+   a null context makes it reject the batch without ever calling us. */
+function primeSignature(){
+  return fetch('/api/sign', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      level: level(),
-      signs: signsList().join(',') || 'none',
-      guardian: $('age-under').checked && $('guardian-check').checked,
-      patient: $('p-name').value,
-      age: $('p-age').value,
-      village: $('p-village').value,
-      complaint: $('p-complaint').value,
-      notes: $('p-notes').value
-    })
+    body: JSON.stringify(casePayload())
   })
     .then(function(r){
       if(!r.ok) return r.json().then(function(e){ throw new Error(e.error || ('HTTP ' + r.status)); });
       return r.json();
     })
-    .then(function(s){
-      signCtx = s.context;
-      cb({ signature: s.signature, timestamp: String(s.timestamp), apiKey: s.apiKey });
-    })
-    .catch(function(e){
-      setStatus('Could not reach the signing service (' + e.message + '). The photo was not uploaded.');
-      $('shoot-btn').disabled = false;
-    });
+    .then(function(s){ signReq = s; return s; });
+}
+
+/* The widget calls this once per file. Hand back the signature we already hold, and
+   make sure the context it is about to post is byte-identical to what was signed. */
+function signUpload(cb){
+  if(!signReq){
+    primeSignature()
+      .then(function(){ signUpload(cb); })
+      .catch(function(e){
+        setStatus('Could not get an upload signature (' + e.message + ').');
+        $('shoot-btn').disabled = false;
+      });
+    return;
+  }
+  cb({ signature: signReq.signature, timestamp: String(signReq.timestamp), apiKey: signReq.apiKey });
 }
 
 function onUpload(err, info){
@@ -262,7 +278,8 @@ function makeWidget(){
       p.folder = FOLDER;
       p.qualityAnalysis = true;   // focus score = the blur gate
       p.tags = 'field,' + level();
-      p.context = signCtx;        // level/signs/patient/... ride with the photo
+      p.context = signReq ? signReq.context : '';
+      p.tags = signReq ? signReq.tags : ('field,' + level());
     },
     uploadSignature: signUpload
   }, onUpload);
@@ -276,10 +293,24 @@ function openWidget(){
   if(!consentOk()) return;
   $('retake').classList.add('hidden');
   $('saved').classList.add('hidden');
-  setStatus('Opening…');
+  setStatus('Preparing…');
   $('shoot-btn').disabled = true;
-  makeWidget();
-  WIDGET.open();
+
+  signReq = null;
+  signCtx = null;
+  if(WIDGET){ try{ WIDGET.destroy({ removeThumbnails: true }); }catch(e){} WIDGET = null; }
+
+  primeSignature()
+    .then(function(s){
+      signCtx = s.context;
+      makeWidget();
+      setStatus('Opening…');
+      WIDGET.open();
+    })
+    .catch(function(e){
+      setStatus('Could not prepare the upload (' + e.message + '). Try again.');
+      $('shoot-btn').disabled = false;
+    });
 }
 $('shoot-btn').addEventListener('click', openWidget);
 
