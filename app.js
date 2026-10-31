@@ -14,8 +14,6 @@
 var CLOUD = 'ydyp2esm';
 var FOLDER = 'clearcase_cases';
 var THRESHOLD = 0.4;
-var WIDGET = null;
-var signCtx = null;  // context frozen per capture (must equal what the signature covers)
 var signReq = null;  // the whole /api/sign payload, fetched before the widget opens
 var USER = null;
 var CASES = [];
@@ -102,7 +100,7 @@ all('[data-role]').forEach(function(btn){
 
 $('sign-out').addEventListener('click', function(){
   fetch('/api/auth', { method: 'DELETE' })
-    .then(function(){ WIDGET = null; CASES = []; FILTER = 'all'; showGate(''); })
+    .then(function(){ signReq = null; CASES = []; FILTER = 'all'; showGate(''); })
     .catch(function(){ showGate('Sign out failed — check the connection.'); });
 });
 
@@ -203,34 +201,9 @@ function primeSignature(){
     .then(function(s){ signReq = s; return s; });
 }
 
-/* The widget calls this once per file. Hand back the signature we already hold, and
-   make sure the context it is about to post is byte-identical to what was signed. */
-function signUpload(cb){
-  if(!signReq){
-    primeSignature()
-      .then(function(){ signUpload(cb); })
-      .catch(function(e){
-        setStatus('Could not get an upload signature (' + e.message + ').');
-        $('shoot-btn').disabled = false;
-      });
-    return;
-  }
-  cb({ signature: signReq.signature, timestamp: String(signReq.timestamp), apiKey: signReq.apiKey });
-}
-
-function onUpload(err, info){
-  if(err){
-    setStatus('Upload failed: ' + (err.message || err));
-    $('shoot-btn').disabled = false;
-    return;
-  }
-  if(!info || info.event !== 'success') return;
+function handleUploaded(pid, focus, bytes){
   setStatus('');
   $('shoot-btn').disabled = false;
-
-  var q = info.quality_analysis || (info.info && info.info.quality_analysis);
-  var focus = (q && typeof q.focus === 'number') ? q.focus : null;
-  var pid = info.public_id;
 
   if(focus !== null && focus < THRESHOLD){
     /* the unusable photo must not sit in storage or reach the doctor */
@@ -246,13 +219,13 @@ function onUpload(err, info){
     return;
   }
 
-  /* the score only exists after the upload completed, so it is written back to the
-     asset's context — that is what puts it on the doctor's card */
+  /* the Admin listing does not return quality_analysis, so the measured score is written
+     into the asset context — that is what puts it on the doctor's card */
   if(focus !== null){
     fetch('/api/score', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ public_id: pid, focus: focus, bytes: info.bytes })
+      body: JSON.stringify({ public_id: pid, focus: focus, bytes: bytes })
     }).catch(function(){});
   }
 
@@ -263,54 +236,71 @@ function onUpload(err, info){
   loadBoard();
 }
 
-function makeWidget(){
-  if(WIDGET) return;
-  WIDGET = cloudinary.createUploadWidget({
-    cloudName: CLOUD,
-    sources: ['local', 'camera'],
-    multiple: false,
-    maxImageWidth: 1600,
-    maxImageHeight: 1600,
-    cropping: false,
-    resourceType: 'image',
-    clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
-    prepareUploadParams: function(p){
-      p.folder = FOLDER;
-      p.qualityAnalysis = true;   // focus score = the blur gate
-      p.tags = 'field,' + level();
-      p.context = signReq ? signReq.context : '';
-      p.tags = signReq ? signReq.tags : ('field,' + level());
-    },
-    uploadSignature: signUpload
-  }, onUpload);
+/* Native <input type=file> + a signed fetch to Cloudinary.
+   Why not the Upload Widget: its cross-origin iframe injects source=uw into the string
+   to sign, and its success event does not surface quality_analysis, so the blur gate had
+   nothing to read. A direct signed POST returns the full upload response — quality_analysis
+   included — and every parameter is one we signed ourselves. */
+function pickFile(){
+  return new Promise(function(resolve){
+    var inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = 'image/jpeg,image/png,image/webp';
+    inp.style.display = 'none';
+    document.body.appendChild(inp);
+    inp.addEventListener('change', function(){
+      var f = inp.files && inp.files[0];
+      document.body.removeChild(inp);
+      resolve(f || null);
+    });
+    inp.click();
+  });
+}
+
+function uploadCase(file){
+  setStatus('Uploading ' + Math.round(file.size / 1024) + ' KB…');
+  return primeSignature()
+    .then(function(s){
+      signReq = s;
+      var fd = new FormData();
+      fd.append('file', file);
+      fd.append('api_key', s.apiKey);
+      fd.append('signature', s.signature);
+      fd.append('timestamp', s.timestamp);
+      fd.append('folder', s.folder);
+      fd.append('source', 'uw');
+      fd.append('tags', s.tags);
+      fd.append('context', s.context);
+      fd.append('quality_analysis', 'true');
+      return fetch('https://api.cloudinary.com/v1_1/' + CLOUD + '/image/upload', { method: 'POST', body: fd });
+    })
+    .then(function(r){
+      return r.json().then(function(j){
+        if(!r.ok) throw new Error((j.error && j.error.message) || ('HTTP ' + r.status));
+        return j;
+      });
+    });
 }
 
 function openWidget(){
-  if(typeof cloudinary === 'undefined' || !cloudinary.createUploadWidget){
-    setStatus('Upload widget failed to load (offline?). Check the connection and reload.');
-    return;
-  }
   if(!consentOk()) return;
   $('retake').classList.add('hidden');
   $('saved').classList.add('hidden');
-  setStatus('Preparing…');
   $('shoot-btn').disabled = true;
+  setStatus('');
 
-  signReq = null;
-  signCtx = null;
-  if(WIDGET){ try{ WIDGET.destroy({ removeThumbnails: true }); }catch(e){} WIDGET = null; }
-
-  primeSignature()
-    .then(function(s){
-      signCtx = s.context;
-      makeWidget();
-      setStatus('Opening…');
-      WIDGET.open();
-    })
-    .catch(function(e){
-      setStatus('Could not prepare the upload (' + e.message + '). Try again.');
-      $('shoot-btn').disabled = false;
-    });
+  pickFile().then(function(file){
+    if(!file){ setStatus(''); $('shoot-btn').disabled = false; return; }
+    return uploadCase(file)
+      .then(function(j){
+        var focus = j.quality_analysis && typeof j.quality_analysis.focus === 'number' ? j.quality_analysis.focus : null;
+        handleUploaded(j.public_id, focus, j.bytes);
+      })
+      .catch(function(e){
+        setStatus('Upload failed: ' + e.message);
+        $('shoot-btn').disabled = false;
+      });
+  });
 }
 $('shoot-btn').addEventListener('click', openWidget);
 

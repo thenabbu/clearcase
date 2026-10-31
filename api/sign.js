@@ -47,9 +47,13 @@ module.exports = (req, res) => {
     'review=pending'
   ].join('|');
 
+  /* source=uw is injected by the Upload Widget itself and IS part of the string to sign
+     (verified against a live 'Invalid Signature' echo). Signing it is mandatory —
+     omitting it was what silently broke every upload from the widget. */
   const params = {
     folder: FOLDER,
     quality_analysis: 'true',      // focus score — the blur gate
+    source: 'uw',
     tags: 'field,' + level,
     context: context,
     timestamp: String(Math.floor(Date.now() / 1000))
